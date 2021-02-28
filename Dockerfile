@@ -8,7 +8,7 @@ MAINTAINER arguilla <arguilla@student.42.fr>
 RUN apt-get -yqq update && apt-get install -yqq curl vim wget
 
 # install ssl 
-RUN apt-get update && apt-get install -qq -y openssl
+RUN apt-get update && apt-get install -yqq openssl
 
 # install nginx
 RUN apt-get -yqq update && apt-get install -yqq nginx
@@ -27,6 +27,10 @@ COPY src/nginx-default .
 
 # copy the wordpress config
 COPY src/wp-config.php .
+
+# auto index nginx
+ARG AUTOINDEX=on
+ENV AUTOINDEX $AUTOINDEX
 
 #run the shell script
 ENTRYPOINT bash run.sh

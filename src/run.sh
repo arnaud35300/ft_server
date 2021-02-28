@@ -23,6 +23,9 @@ display_msg $GREEN "Mise en place du fichier de configuration nginx."
 mv nginx-default /etc/nginx/sites-available/site
 ln -s /etc/nginx/sites-available/site /etc/nginx/sites-enabled/site
 rm -rf /etc/nginx/sites-enabled/default
+if [ $AUTOINDEX = "off" ]; then
+	sed -i "s/autoindex on/autoindex off/" /etc/nginx/sites-enabled/site
+fi
 display_msg $GREEN "Permissions du serveur pour site."
 chown -R www-data /var/www/*
 chmod -R 755 /var/www/*
