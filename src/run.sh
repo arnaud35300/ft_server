@@ -5,12 +5,12 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 display_msg () {
-	[[ $# -ne 2 ]] && return 2;
-	printf "${*}${NC}\n"
+	[[ $# -ne 3 ]] && return 2;
+	echo -en "[ ${1}${2}${NC} ] ${3}\n"
 }
 
 # ssl
-display_msg $GREEN "Generation du certificat SSL."
+display_msg $GREEN "ok" "Certificat SSL."
 mkdir /etc/nginx/ssl
 openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/site.pem -keyout /etc/nginx/ssl/site.key -subj "/C=FR/ST=Paris/L=Paris/O=42Paris/OU=arguilla/CN=site" &> /dev/null
 
@@ -19,27 +19,27 @@ mkdir /var/www/site && touch /var/www/site/index.php
 echo "<h1>Bienvenue !</h1><p>Si un nombre aleatoire s'affiche, c'est que PHP fonctionne.</p><h2><?= rand(0,100); ?></h2>" >> /var/www/site/index.php
 
 # nginx
-display_msg $GREEN "Mise en place du fichier de configuration nginx."
+display_msg $GREEN "ok" "Configuration nginx."
 mv nginx-default /etc/nginx/sites-available/site
 ln -s /etc/nginx/sites-available/site /etc/nginx/sites-enabled/site
 rm -rf /etc/nginx/sites-enabled/default
 if [ $AUTOINDEX = "off" ]; then
 	sed -i "s/autoindex on/autoindex off/" /etc/nginx/sites-enabled/site
 fi
-display_msg $GREEN "Permissions du serveur pour site."
+display_msg $([ $AUTOINDEX = "on" ] && echo $GREEN || echo $RED) $([ $AUTOINDEX = "on" ] && echo "ok" || echo "ko")  "AUTOINDEX"
 chown -R www-data /var/www/*
 chmod -R 755 /var/www/*
 
 # mySQL
 service mysql start
-display_msg $GREEN "Creation de la base de donnees."
+display_msg $GREEN "ok" "Creation de la base de donnees."
 echo "CREATE DATABASE wordpress" | mysql -u root
 echo "GRANT ALL PRIVILEGES ON wordpress.* TO 'root'@'localhost';" | mysql -u root
 echo "GRANT ALL ON *.* TO 'arguilla'@'localhost' IDENTIFIED BY 'password';" | mysql -u root
 echo "FLUSH PRIVILEGES;" | mysql -u root --skip-password
 
 # phpMyAdmin
-display_msg $GREEN "Installation et configuration de PhpMyAdmin."
+display_msg $GREEN "ok" "Installation et configuration de PhpMyAdmin."
 wget https://files.phpmyadmin.net/phpMyAdmin/5.0.2/phpMyAdmin-5.0.2-all-languages.tar.gz &> /dev/null
 tar -zxvf phpMyAdmin-5.0.2-all-languages.tar.gz &> /dev/null
 mv phpMyAdmin-5.0.2-all-languages phpmyadmin
@@ -54,16 +54,16 @@ wget https://wordpress.org/latest.tar.gz &> /dev/null
 tar -xvf latest.tar.gz &> /dev/null
 mv wordpress /var/www/site/
 mv wp-config.php /var/www/site/wordpress
-#chown -R www-data: www-data /var/www/site/wordpress
+display_msg $GREEN "ok" "Installation de wordrpess."
 
 # service nginx
-display_msg $GREEN "Lancement du serveur nginx."
+display_msg $GREEN "ok" "Lancement du serveur nginx."
 service nginx start
 
 # service php-fpm
-display_msg $GREEN "Lancement de PHP."
+display_msg $GREEN "ok" "Lancement de PHP."
 service php7.3-fpm start
 
 # start the shell
-display_msg ${GREEN} "Bienvenue!"
+display_msg ${GREEN} "ok" "Bienvenue!"
 bash
