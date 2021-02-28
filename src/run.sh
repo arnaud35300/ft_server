@@ -37,7 +37,7 @@ echo "FLUSH PRIVILEGES;" | mysql -u root --skip-password
 
 # phpMyAdmin
 display_msg $GREEN "Installation et configuration de PhpMyAdmin."
-wget https://files.phpmyadmin.net/phpMyAdmin/5.0.2/phpMyAdmin-5.0.2-all-languages.tar.gz
+wget https://files.phpmyadmin.net/phpMyAdmin/5.0.2/phpMyAdmin-5.0.2-all-languages.tar.gz &> /dev/null
 tar -zxvf phpMyAdmin-5.0.2-all-languages.tar.gz &> /dev/null
 mv phpMyAdmin-5.0.2-all-languages phpmyadmin
 mv phpmyadmin /var/www/site
@@ -46,7 +46,14 @@ mkdir /var/www/site/phpmyadmin/tmp
 chmod 777 /var/www/site/phpmyadmin/tmp
 sed -i "s/\['AllowNoPassword'\] = false/\['AllowNoPassword'\] = true/;s/\['blowfish_secret'\] = ''/\['blowfish_secret'\] = '\\\$2a\\\$10\\\$yaICXFXOD0xLQgfHdAsdfuLCqxGdIzooX3zNtE6dd1mir4EcLJpvO'/;/^\\\$cfg\['SaveDir'\].*/a \\\$cfg\['TempDir'\] = '/var/www/site/phpmyadmin/tmp';" /var/www/site/phpmyadmin/config.inc.php
 
-# service start
+# wordpress
+wget https://wordpress.org/latest.tar.gz &> /dev/null
+tar -xvf latest.tar.gz &> /dev/null
+mv wordpress /var/www/site/
+mv wp-config.php /var/www/site/wordpress
+#chown -R www-data: www-data /var/www/site/wordpress
+
+# service nginx
 display_msg $GREEN "Lancement du serveur nginx."
 service nginx start
 

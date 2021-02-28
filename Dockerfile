@@ -19,16 +19,14 @@ RUN apt-get -y install php7.3-fpm php7.3-common php7.3-mysql php7.3-gmp php7.3-c
 # install mariadb
 RUN apt-get -y install mariadb-server
 
-#copy run script in the container
+# copy the run script in the container
 COPY src/run.sh .
 
 # copy the nginx default configuration file
 COPY src/nginx-default .
 
-# expose port
-EXPOSE 81
-EXPOSE 8888
-EXPOSE 443
+# copy the wordpress config
+COPY src/wp-config.php .
 
 #run the shell script
 ENTRYPOINT bash run.sh
