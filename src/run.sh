@@ -27,9 +27,24 @@ display_msg $GREEN "Permissions du serveur pour site."
 chown -R www-data /var/www/*
 chmod -R 755 /var/www/*
 
-# mysql
+# mySQL
 service mysql start
-echo "CREATE DATABASE wordpress" | mysql -u root --skip-password
+display_msg $GREEN "Creation de la base de donnees."
+echo "CREATE DATABASE wordpress" | mysql -u root
+echo "GRANT ALL PRIVILEGES ON wordpress.* TO 'root'@'localhost';" | mysql -u root
+echo "GRANT ALL ON *.* TO 'arguilla'@'localhost' IDENTIFIED BY 'password';" | mysql -u root
+echo "FLUSH PRIVILEGES;" | mysql -u root --skip-password
+
+# phpMyAdmin
+display_msg $GREEN "Installation et configuration de PhpMyAdmin."
+wget https://files.phpmyadmin.net/phpMyAdmin/5.0.2/phpMyAdmin-5.0.2-all-languages.tar.gz
+tar -zxvf phpMyAdmin-5.0.2-all-languages.tar.gz &> /dev/null
+mv phpMyAdmin-5.0.2-all-languages phpmyadmin
+mv phpmyadmin /var/www/site
+cp -rp /var/www/site/phpmyadmin/config.sample.inc.php /var/www/site/phpmyadmin/config.inc.php &> /dev/null
+mkdir /var/www/site/phpmyadmin/tmp
+chmod 777 /var/www/site/phpmyadmin/tmp
+sed -i "s/\['AllowNoPassword'\] = false/\['AllowNoPassword'\] = true/;s/\['blowfish_secret'\] = ''/\['blowfish_secret'\] = '\\\$2a\\\$10\\\$yaICXFXOD0xLQgfHdAsdfuLCqxGdIzooX3zNtE6dd1mir4EcLJpvO'/;/^\\\$cfg\['SaveDir'\].*/a \\\$cfg\['TempDir'\] = '/var/www/site/phpmyadmin/tmp';" /var/www/site/phpmyadmin/config.inc.php
 
 # service start
 display_msg $GREEN "Lancement du serveur nginx."
